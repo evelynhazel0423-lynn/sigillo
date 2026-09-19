@@ -1,0 +1,41 @@
+{
+  "name": "sigillo",
+  "version": "1.0.0",
+  "description": "A sealed feedback receipt between a human and their AI partner — star-rated aftercare review cards, a cooldown that forbids repeats, and the agent's own notes pinned to the card.",
+  "license": "CC-BY-4.0",
+  "author": "Cu & Lunedì",
+  "type": "commonjs",
+  "main": "index.cjs",
+  "files": [
+    "index.cjs",
+    "lib/",
+    "web/",
+    "docs/",
+    "examples/",
+    "LICENSE",
+    "README.md"
+  ],
+  "keywords": [
+    "agent",
+    "aftercare",
+    "feedback",
+    "llm",
+    "companion",
+    "self-hosted"
+  ],
+  "scripts": {
+    "test": "node --test",
+    "example": "node examples/server.cjs",
+    "demo": "python3 -m http.server 8080 --directory web"
+  },
+  "peerDependencies": {
+    "express": ">=4",
+    "zod": ">=3",
+    "playwright": ">=1.40"
+  },
+  "peerDependenciesMeta": {
+    "express": { "optional": true },
+    "zod": { "optional": true },
+    "playwright": { "optional": true }
+  }
+}

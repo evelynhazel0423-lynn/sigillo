@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>sigillo · 回执长图</title>
+  <!-- 只为出图的壳页:lib/snapshot.cjs 用无头浏览器打开它,截 #snap 那一块。
+       页面本身不该挂在导航里,也不该被人直接访问(所有请求都被截图器喂本地盘,
+       真访问它会因为拿不到 /:id 的 JSON 而停在空壳)。
+       渲染逻辑零复制:直接 import 同一份 review-card.js + 同一份参考皮。 -->
+  <link rel="stylesheet" href="./review-card.css">
+  <script>
+    // 经典脚本先于 module 执行:先把后端前缀钉好,再让模块去拉数据。
+    (function () {
+      var p = new URLSearchParams(location.search);
+      window.SIGILLO_API_BASE = p.get("api") || "/api/sigillo/";
+    })();
+  </script>
+  <style>
+    /* 出图底:340(卡宽)+ 24×2(留白)= 388 CSS px;3x 出图即 1164px 宽。
+       深色纸面,存进相册后不是一张孤零零的白纸。想换成自己的底色改这里就行。 */
+    html, body { margin: 0; padding: 0; background: #16151a; }
+    #snap {
+      box-sizing: border-box;
+      width: 388px;
+      padding: 24px;
+      background: #16151a;
+    }
+    /* 长图里不需要亮色主题跟着系统走:出图永远是同一张脸。 */
+    #card {
+      --sigillo-bg: #1b1a1e;
+      --sigillo-fg: #e9e4db;
+      --sigillo-dim: #948c80;
+      --sigillo-line: #3a3640;
+      --sigillo-accent: #c8a86a;
+      --sigillo-field: #201f25;
+      --sigillo-star-on: #d9b475;
+      --sigillo-star-off: #4a4550;
+    }
+  </style>
+</head>
+<body>
+  <div id="snap">
+    <div id="card" class="sg-card sg-card--snap sg-card--loading"></div>
+  </div>
+  <script type="module">
+    import { hydrateSigilloCards } from "./review-card.js";
+
+    const card = document.getElementById("card");
+    const id = new URLSearchParams(location.search).get("id") || "";
+
+    // 直出只读回执:dataset.sigilloOpen 是渲染分发的开关(submitted + open = 回执)。
+    card.dataset.sigilloId = id;
+    card.dataset.sigilloOpen = "1";
+    hydrateSigilloCards(document);
+
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+    async function until(fn, ms) {
+      const t0 = Date.now();
+      while (Date.now() - t0 < ms) {
+        if (fn()) return true;
+        await sleep(50);
+      }
+      return false;
+    }
+
+    (async () => {
+      // 1) 等 hydrate 把信笺画出来(fetch 是异步的,hydrateSigilloCards 不返回 Promise)。
+      await until(() => card.querySelector(".sg-sheet"), 8000);
+      // 2) 等字体 —— 加 6s 兜底,万一吊住也不能让整次出图烂在这儿(截到 fallback
+      //    字形总比 500 强)。
+      await Promise.race([document.fonts.ready, sleep(6000)]);
+      // 3) 等图片解码(参考皮里没有图,自定义皮肤可能有)。
+      await Promise.all([...document.images].map((i) => i.decode().catch(() => 0)));
+      // 4) 重排一帧再放行。
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      window.__snapReady = true;
+    })();
+  </script>
+</body>
+</html>

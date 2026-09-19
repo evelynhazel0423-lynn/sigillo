@@ -1,0 +1,422 @@
+/* web/review-card.css — reference skin, bring your own.
+ *
+ * 这是一份**朴素参考皮**:系统字体、两层边框、没有插画也没有动画,只保证卡片
+ * 在任何页面里都能看、能点、能读屏。原产品那套(信封插画 / 拆封动画 / 花体字标 /
+ * 渐隐玫瑰)是私人皮肤,不在这个仓库里。
+ *
+ * 所有颜色都走 --sigillo-* 自定义属性,亮/暗两套默认值在下面。想换皮就在你自己的
+ * 样式表里覆盖这些变量(或整份重写),review-card.js 一个字都不用改 ——
+ * 它只产出语义化 class,不带内联样式。
+ */
+
+.sg-card {
+  --sigillo-bg: #fbf9f5;
+  --sigillo-fg: #23201c;
+  --sigillo-dim: #7c7468;
+  --sigillo-line: #d8d0c2;
+  --sigillo-accent: #8a6d3b;
+  --sigillo-field: #fffdf9;
+  --sigillo-star-on: #b8893c;
+  --sigillo-star-off: #d8d0c2;
+  --sigillo-focus: #8a6d3b;
+  --sigillo-radius: 12px;
+  --sigillo-font: ui-serif, Georgia, "Songti SC", "Noto Serif CJK SC", serif;
+  --sigillo-shadow: 0 1px 2px rgba(0, 0, 0, .06), 0 8px 24px rgba(0, 0, 0, .05);
+
+  display: block;
+  margin: 10px 0;
+  max-width: 340px;
+  font-family: var(--sigillo-font);
+  color: var(--sigillo-fg);
+  -webkit-text-size-adjust: 100%;
+}
+
+@media (prefers-color-scheme: dark) {
+  .sg-card {
+    --sigillo-bg: #1b1a1e;
+    --sigillo-fg: #e9e4db;
+    --sigillo-dim: #948c80;
+    --sigillo-line: #3a3640;
+    --sigillo-accent: #c8a86a;
+    --sigillo-field: #201f25;
+    --sigillo-star-on: #d9b475;
+    --sigillo-star-off: #4a4550;
+    --sigillo-focus: #c8a86a;
+    --sigillo-shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 28px rgba(0, 0, 0, .35);
+  }
+}
+
+.sg-card--loading { min-height: 1px; }
+
+.sg-card--dead .sg-card__dead {
+  padding: 8px 2px;
+  font-size: 13px;
+  color: var(--sigillo-dim);
+}
+
+/* ── 收纳面(封面 / 封缄面)── 纯 CSS 简卡,不露任何表单内容 */
+.sg-face {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 18px 16px 16px;
+  font: inherit;
+  text-align: center;
+  color: inherit;
+  background: var(--sigillo-bg);
+  border: 1px solid var(--sigillo-line);
+  border-radius: var(--sigillo-radius);
+  box-shadow: var(--sigillo-shadow);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.sg-face:hover { border-color: var(--sigillo-accent); }
+.sg-face:focus-visible { outline: 1px solid var(--sigillo-focus); outline-offset: 2px; }
+
+.sg-face__title {
+  font-size: 10px;
+  letter-spacing: .34em;
+  text-indent: .34em;
+  color: var(--sigillo-accent);
+}
+.sg-face__note {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.5;
+  word-break: break-word;
+}
+.sg-face__hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--sigillo-dim);
+}
+.sg-face__sep { font-style: normal; color: var(--sigillo-accent); }
+.sg-face--sealed { border-style: double; border-width: 3px; }
+
+/* ── 信笺 ── */
+.sg-sheet {
+  background: var(--sigillo-bg);
+  border: 1px solid var(--sigillo-line);
+  border-radius: var(--sigillo-radius);
+  box-shadow: var(--sigillo-shadow);
+  overflow: hidden;
+}
+.sg-scroller {
+  max-height: 520px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.sg-inner { padding: 14px 14px 12px; }
+
+.sg-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.sg-head__cap {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .3em;
+  text-indent: .3em;
+  color: var(--sigillo-accent);
+}
+
+/* ✦ —— ✦ —— ✦ */
+.sg-orn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  font-size: 9px;
+  color: var(--sigillo-accent);
+}
+.sg-orn__line {
+  flex: 1;
+  height: 1px;
+  background: var(--sigillo-line);
+}
+.sg-orn--bottom { margin: 12px 0 8px; }
+
+.sg-date {
+  margin-top: 8px;
+  font-size: 11px;
+  text-align: center;
+  letter-spacing: .06em;
+  color: var(--sigillo-dim);
+}
+.sg-ctx {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.6;
+  text-align: center;
+  color: var(--sigillo-dim);
+}
+
+/* ── 固定总评 ── */
+.sg-dims { margin-top: 10px; }
+.sg-dim {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.sg-dim__k {
+  font-size: 12px;
+  letter-spacing: .1em;
+  color: var(--sigillo-fg);
+}
+.sg-dim__cn {
+  display: block;
+  margin-top: 1px;
+  font-style: normal;
+  font-size: 10px;
+  letter-spacing: .14em;
+  color: var(--sigillo-dim);
+}
+
+.sg-hr {
+  height: 1px;
+  margin: 8px 2px 4px;
+  background: var(--sigillo-line);
+}
+
+/* ── 细节条目 ── */
+.sg-item { padding: 6px 0; }
+.sg-item + .sg-item { border-top: 1px dashed var(--sigillo-line); }
+
+.sg-q {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+}
+.sg-q__mark { font-size: 9px; color: var(--sigillo-accent); }
+.sg-q__text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.65;
+  word-break: break-word;
+}
+
+.sg-item .sg-stars { margin-left: -4px; }
+
+/* 备注框 */
+.sg-box { margin-top: 4px; }
+.sg-box__ta {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 6px 8px;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--sigillo-fg);
+  background: var(--sigillo-field);
+  border: 1px solid var(--sigillo-line);
+  border-radius: 6px;
+  resize: vertical;
+}
+.sg-box__ta:focus-visible {
+  outline: 1px solid var(--sigillo-focus);
+  outline-offset: -1px;
+}
+
+/* 只读回执里的备注:一条引线 */
+.sg-roline {
+  margin: 4px 0 2px 14px;
+  padding-left: 8px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--sigillo-dim);
+  border-left: 1px solid var(--sigillo-accent);
+  word-break: break-word;
+}
+
+.sg-suggest { margin-top: 10px; }
+
+/* ── 星:clip-path 切的五角星,零图片,跟着主题变色 ── */
+.sg-stars { display: flex; align-items: center; }
+.sg-starcell {
+  width: 34px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.sg-starcell:focus-visible {
+  outline: 1px solid var(--sigillo-focus);
+  outline-offset: -8px;
+  border-radius: 10px;
+}
+.sg-starcell:disabled { cursor: default; }
+.sg-star {
+  /* 正五边形五角星:外顶点归一化到包围盒,盒子按真实比例压到 高=宽×0.951 */
+  position: relative;   /* 半星覆层的定位锚 */
+  width: 17px;
+  height: 16.2px;
+  background: var(--sigillo-star-off);
+  clip-path: polygon(50% 0%, 61.8% 38.2%, 100% 38.2%, 69.1% 61.8%, 80.9% 100%, 50% 76.4%, 19.1% 100%, 30.9% 61.8%, 0% 38.2%, 38.2% 38.2%);
+  transition: background .2s ease;
+}
+/* 半星:左半亮右半灰。覆层是星形 span 的子盒,被父级 clip-path 一并裁成星形。 */
+.sg-star::after {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0; left: 0;
+  width: 50%;
+  background: var(--sigillo-star-on);
+  opacity: 0;
+  transition: opacity .2s ease;
+}
+.sg-starcell.is-on .sg-star { background: var(--sigillo-star-on); }
+.sg-starcell.is-half .sg-star::after { opacity: 1; }
+.sg-starcell--sm { width: 28px; height: 32px; }
+.sg-starcell--sm .sg-star { width: 14px; height: 13.3px; }
+
+/* ── 底部:提交闸 / 封缄章 ── */
+.sg-footbar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding-bottom: 4px;
+}
+.sg-sealbtn,
+.sg-stamp,
+.sg-snapbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  font: inherit;
+  font-size: 13px;
+  letter-spacing: .08em;
+  color: var(--sigillo-accent);
+  background: transparent;
+  border: 1px solid var(--sigillo-accent);
+  border-radius: 999px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.sg-sealbtn:disabled { opacity: .45; cursor: default; }
+.sg-sealbtn:hover:not(:disabled),
+.sg-stamp:hover,
+.sg-snapbtn:hover:not(:disabled) {
+  color: var(--sigillo-bg);
+  background: var(--sigillo-accent);
+}
+.sg-sealbtn:focus-visible,
+.sg-stamp:focus-visible,
+.sg-snapbtn:focus-visible { outline: 1px solid var(--sigillo-focus); outline-offset: 2px; }
+
+/* 封蜡的小圆点 */
+.sg-wax {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.sg-stamp { display: flex; margin: 6px auto 0; }
+
+.sg-footnote {
+  font-size: 11px;
+  color: var(--sigillo-dim);
+}
+
+.sg-snaprow { display: flex; justify-content: center; padding: 9px 2px 0; }
+.sg-snapbtn:disabled { opacity: .55; cursor: default; }
+
+/* ── 长图快照态 ── 只给 snapshot.html 用(无头浏览器出图那页):
+ * 放开高度让整张纸一次出完,藏掉图里没用的「存为长图」按钮。 */
+.sg-card--snap { margin: 0; max-width: none; }
+.sg-card--snap .sg-scroller { max-height: none; overflow: visible; }
+.sg-card--snap .sg-snaprow { display: none; }
+
+/* ── 长图预览层 ── */
+.sg-snapov {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  background: rgba(10, 9, 12, .92);
+  color: #f2ece2;
+  font-family: var(--sigillo-font, ui-serif, Georgia, serif);
+}
+.sg-snapov__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+}
+.sg-snapov__title { font-size: 13px; letter-spacing: .1em; }
+.sg-snapov__x {
+  width: 32px;
+  height: 32px;
+  font-size: 20px;
+  line-height: 1;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.sg-snapov__scroll {
+  flex: 1;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 0 16px 16px;
+}
+.sg-snapov__img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+.sg-snapov__wait {
+  margin: auto;
+  font-size: 13px;
+  opacity: .8;
+}
+.sg-snapov__foot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+}
+.sg-snapov__hint { font-size: 12px; opacity: .7; }
+.sg-snapov__share {
+  padding: 8px 18px;
+  font: inherit;
+  font-size: 13px;
+  color: inherit;
+  text-decoration: none;
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+/* ── 淡入 ── 唯一的动画,且尊重 reduce motion ── */
+.sg-fadein { animation: sg-fadein .22s ease both; }
+@keyframes sg-fadein {
+  from { opacity: 0; transform: translateY(2px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sg-fadein { animation: none; }
+  .sg-star, .sg-star::after { transition: none; }
+}
