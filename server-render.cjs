@@ -19,10 +19,15 @@ const path = require("path");
 const http = require("http");
 
 const ROOT = __dirname;
-const DATA_DIR = path.join(ROOT, "data");
+
+// Render 免费档没有持久化磁盘:每次部署/spin down 唤醒,data/ 会被清空。
+// 用环境变量 SIGILLO_DATA_DIR 指到持久位置(挂了 Render Disk 的目录);
+// 不配就退回代码目录旁的 data/ —— 单机/沙箱里这样够用。
+const DATA_DIR = process.env.SIGILLO_DATA_DIR
+  ? path.resolve(process.env.SIGILLO_DATA_DIR)
+  : path.join(ROOT, "data");
 const FILE = path.join(DATA_DIR, "sigillo.json");
 const WAKE_FILE = path.join(DATA_DIR, "wake-pending.json");
-
 const PORT = Number(process.env.PORT || 8087);
 const TOKEN = process.env.SIGILLO_TOKEN || "let-me-in";
 const WAKE_URL = process.env.SIGILLO_WAKE_URL || "";
