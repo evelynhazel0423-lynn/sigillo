@@ -71,6 +71,7 @@ if (!ID || !TOKEN) {
 } else {
   document.getElementById("hint").textContent = "";
   window.SIGILLO_API_BASE = "/api/sigillo/";
+  window.SIGILLO_TOKEN = TOKEN;
   document.getElementById("msg").innerHTML =
     '<div class="sg-card" data-sigillo-id="' + ID + '"></div>';
 }

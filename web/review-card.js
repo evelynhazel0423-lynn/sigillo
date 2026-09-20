@@ -44,6 +44,15 @@ function apiBase() {
   return typeof v === "string" && v ? v : DEFAULT_API_BASE;
 }
 
+// 鉴权:宿主页从 URL 取了 token 就挂在 window.SIGILLO_TOKEN 上;
+// 没挂就不带(默认例子服务端本来就不鉴权,行为不变)。
+function authHeaders(extra) {
+  const t = typeof window !== "undefined" && window.SIGILLO_TOKEN;
+  const out = Object.assign({}, extra || {});
+  if (typeof t === "string" && t) out["x-sigillo-token"] = t;
+  return out;
+}
+
 // 固定总评项:后端字段名 → 屏上的西文/中文。顺序即上屏顺序。
 // 换了 store 的 fixedKeys 就在宿主页设 window.SIGILLO_FIXED = [{key,en,cn},…]。
 const DEFAULT_FIXED = [
@@ -111,7 +120,7 @@ async function _load(node, id) {
   try {
     const r = await fetch(apiBase() + encodeURIComponent(id), {
       credentials: "include",
-      headers: { "Accept": "application/json" }
+      headers: authHeaders({ "Accept": "application/json" })
     });
     if (!r.ok) throw 0;
     const j = await r.json();
@@ -318,7 +327,7 @@ async function _submit(node, st, btn, foot) {
     const r = await fetch(apiBase() + encodeURIComponent(id) + "/submit", {
       method: "POST",
       credentials: "include",
-      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      headers: authHeaders({ "Content-Type": "application/json", "Accept": "application/json" }),
       body: JSON.stringify(payload)
     });
     if (r.status === 409) { await _load(node, id); return; }
