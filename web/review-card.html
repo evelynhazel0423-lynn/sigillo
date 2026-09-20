@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>sigillo · 回执</title>
+<link rel="stylesheet" href="./review-card.css">
+<style>
+  :root {
+    color-scheme: light dark;
+    --page-bg: #f4f1ea;
+    --page-fg: #2a2621;
+    --page-dim: #7a7266;
+    --page-line: #ddd6c8;
+    --page-card: #fffdf8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --page-bg: #131217;
+      --page-fg: #e7e2d8;
+      --page-dim: #918a7e;
+      --page-line: #33303a;
+      --page-card: #1b1a20;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 24px 16px 64px;
+    background: var(--page-bg);
+    color: var(--page-fg);
+    font-family: ui-sans-serif, system-ui, "Helvetica Neue", "PingFang SC", sans-serif;
+    line-height: 1.7;
+  }
+  .wrap { max-width: 680px; margin: 0 auto; }
+  h1 { margin: 0 0 4px; font-size: 20px; letter-spacing: .04em; font-weight: 600; }
+  .sub { margin: 0 0 24px; font-size: 13px; color: var(--page-dim); }
+  .bubble {
+    padding: 12px 14px;
+    margin-bottom: 20px;
+    background: var(--page-card);
+    border: 1px solid var(--page-line);
+    border-radius: 14px;
+  }
+  .bubble p { margin: 0 0 6px; font-size: 14px; }
+  .bubble p:last-child { margin-bottom: 0; }
+  .who { font-size: 11px; letter-spacing: .14em; color: var(--page-dim); margin-bottom: 6px; }
+  .foot { margin-top: 32px; font-size: 12px; color: var(--page-dim); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>sigillo</h1>
+  <p class="sub" id="hint">读取中…</p>
+
+  <div class="bubble" id="card-host">
+    <div class="who">AGENT</div>
+    <div id="msg"></div>
+  </div>
+
+  <p class="foot">打星支持半星(点左半格=半星,右半格=整星,再点当前值归零)。封缄之后不可改。</p>
+</div>
+
+<script>
+// 从 URL 取 id 和 token,卡片端点挂在这个前缀下
+const q = new URLSearchParams(location.search);
+const ID = q.get("id");
+const TOKEN = q.get("token");
+if (!ID || !TOKEN) {
+  document.getElementById("hint").textContent = "缺参数:需要 ?id=sg_xxx&token=xxx";
+} else {
+  document.getElementById("hint").textContent = "";
+  window.SIGILLO_API_BASE = "/api/sigillo/";
+  document.getElementById("msg").innerHTML =
+    '<div class="sg-card" data-sigillo-id="' + ID + '"></div>';
+}
+</script>
+
+<script type="module">
+import { hydrateSigilloCards } from "./review-card.js";
+const host = document.getElementById("card-host");
+if (host.querySelector("[data-sigillo-id]")) hydrateSigilloCards(host);
+</script>
+</body>
+</html>
